@@ -2,19 +2,20 @@
 
 Cube::Cube(){
     points = NULL;
-    side = 100;
+    origin = Gdiplus::PointF(0, 0);
+    focal = 500;
 }
 
 Cube::Cube(const Gdiplus::PointF& origin){
-    if (!points){
-        delete points;
-    }
-    points = new Gdiplus::PointF[SQUARE_SIDES];
-    side = 100;
-    points[0] = origin;
-    points[1] = Gdiplus::PointF(origin.X + side, origin.Y);
-    points[2] = Gdiplus::PointF(origin.X + side - 40, origin.Y - 40);
-    points[3] = Gdiplus::PointF(origin.X - 40, origin.Y - 40);
+    this->origin = origin;    
+    focal = 500;
+    points = new Point3D[SQUARE_SIDES];
+
+    // Initalize the top face of the cube
+    points[0] = Point3D(0, 0, SIDE_LENGTH);
+    points[1] = Point3D(SIDE_LENGTH, 0, SIDE_LENGTH);
+    points[2] = Point3D(SIDE_LENGTH, SIDE_LENGTH, SIDE_LENGTH);
+    points[3] = Point3D(0, SIDE_LENGTH, SIDE_LENGTH);
 }
 
 Cube::~Cube(){
@@ -25,12 +26,17 @@ std::vector <Gdiplus::PointF*> Cube::calFaces(){
     std::vector <Gdiplus::PointF*> faces;
     
     // Top face
-    faces.push_back(points);
+    Gdiplus::PointF* topFace = new Gdiplus::PointF[SQUARE_SIDES];
+    for (int i = 0; i < SQUARE_SIDES; i++){
+        topFace[i] = points[i].to2D(focal, origin);
+    }
+
+    faces.push_back(topFace);
 
     // Bottom face
     Gdiplus::PointF* bottomFace = new Gdiplus::PointF[SQUARE_SIDES];
     for (int i = 0; i < SQUARE_SIDES; i++){
-        bottomFace[i] = Gdiplus::PointF(points[i].X, points[i].Y + side);
+        bottomFace[i] = Gdiplus::PointF(topFace[i].X, topFace[i].Y + SIDE_LENGTH);
     }
 
     // Middle faces
@@ -39,7 +45,7 @@ std::vector <Gdiplus::PointF*> Cube::calFaces(){
         for (int j = 0; j < SQUARE_SIDES; j++){
             if (j < 2){
                 // 2 points on top
-                middleFace[j] = points[(j + i) % 4];
+                middleFace[j] = topFace[(j + i) % 4];
             }
             else{
                 // 2 points at bottom
@@ -56,6 +62,10 @@ std::vector <Gdiplus::PointF*> Cube::calFaces(){
     return faces;
 }
 
+// Point3D Cube::convert2Dto3D(const Gdiplus::PointF& point2D){
+
+// }
+
 void Cube::render(Gdiplus::Graphics& graphics){
     Gdiplus::Pen pen(Gdiplus::Color(255, 0, 0, 0));
     
@@ -65,7 +75,7 @@ void Cube::render(Gdiplus::Graphics& graphics){
         graphics.DrawPolygon(&pen, faces[i], SQUARE_SIDES);
     }
 
-    for (int i = 1; i < faces.size(); i++){
+    for (int i = 0; i < faces.size(); i++){
         delete[] faces[i];
     }
 }

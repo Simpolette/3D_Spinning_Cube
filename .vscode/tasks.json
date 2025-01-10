@@ -9,7 +9,7 @@
                 "-g",
                 "${workspaceFolder}\\*.cpp",
                 "-o",
-                "${fileDirname}\\${fileBasenameNoExtension}.exe",
+                "${workspaceFolder}\\main.exe",
                 "-lgdiplus",
                 "-mwindows"
             ],

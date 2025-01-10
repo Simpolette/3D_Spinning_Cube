@@ -3,17 +3,20 @@
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
+Cube cube(Gdiplus::PointF(500, 500));
+
 VOID OnPaint(HDC hdc){
    Gdiplus::Graphics graphics(hdc);
    graphics.SetSmoothingMode(Gdiplus::SmoothingModeHighQuality);
-   Cube cube(Gdiplus::PointF(100, 100));
    cube.render(graphics);
+   cube.spin(5);
+
 }
 
 INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR argument, INT iCmdShow)
 {
-   // AllocConsole();
-   // freopen("CONOUT$", "w", stdout);
+   AllocConsole();
+   freopen("CONOUT$", "w", stdout);
    HWND                          hWnd;
    MSG                           msg;
    WNDCLASS                      wndClass;
@@ -49,6 +52,8 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR argument, INT iCmdShow)
       hInstance,                // program instance handle
       NULL);                    // creation parameters
 
+   cube.setFOV(10);
+
    ShowWindow(hWnd, iCmdShow);
    UpdateWindow(hWnd);
 
@@ -57,8 +62,8 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR argument, INT iCmdShow)
       TranslateMessage(&msg);
       DispatchMessage(&msg);
    }
-
-   // FreeConsole();
+   
+   FreeConsole();
    Gdiplus::GdiplusShutdown(gdiplusToken);
    return msg.wParam;
 }  // WinMain
@@ -78,30 +83,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message,
       EndPaint(hWnd, &ps);
       return 0;
    }
-   case WM_MOUSEWHEEL: {
-       int zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
-       InvalidateRect(hWnd, NULL, TRUE);
-       return 0;
-   }
-   case WM_KEYDOWN:
-       switch (wParam) {
-       case VK_LEFT: // Xoay ngược chiều kim đồng hồ
-            InvalidateRect(hWnd, NULL, TRUE);
-            break;
-       case VK_RIGHT: // Xoay thuận chiều kim đồng hồ
-            InvalidateRect(hWnd, NULL, TRUE);
-            break;
-       case VK_UP: // Zoom in
-            InvalidateRect(hWnd, NULL, TRUE);
-            break;
-       case VK_DOWN: // Zoom out
-            InvalidateRect(hWnd, NULL, TRUE);
-            break;
-       }
-       return 0;
+   case WM_CREATE:
+      SetTimer(hWnd, 1, 16, NULL); // Timer with 16 ms interval
+      return 0;
+
+   // Handle the timer
+   case WM_TIMER:
+      InvalidateRect(hWnd, NULL, TRUE); // Trigger repaint
+      return 0;
+
    case WM_DESTROY:
       PostQuitMessage(0);
       return 0;
+      
    default:
       return DefWindowProc(hWnd, message, wParam, lParam);
    }

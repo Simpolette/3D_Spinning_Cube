@@ -7,7 +7,6 @@
 #include <vector>
 #include <cmath>
 
-#include "Point3D.h"
 #include "Matrix.h"
 
 #ifndef CUBE
@@ -22,7 +21,7 @@ class Cube{
 
 private:
     Gdiplus::PointF origin;
-    Point3D* points;
+    Matrix* points;
     double focal;
 
 private:
@@ -37,8 +36,9 @@ public:
     Cube();
     Cube(const Gdiplus::PointF& origin);
     ~Cube();
+    void setFOV(double angle);
     void render(Gdiplus::Graphics& graphics);
-    void spin();
+    void spin(double speed);
 };
 
 

@@ -23,15 +23,12 @@ private:
     Gdiplus::PointF origin;
     Matrix* points;
     double focal;
+    Gdiplus::Pen* pen;
 
 private:
     std::vector <Gdiplus::PointF*> calFaces();
     // Point3D convert2Dto3D(const Gdiplus::PointF& point2D);
-    double convertDegToRad(double degree);
-    Matrix getXRotationMatrix(double angle);
-    Matrix getYRotationMatrix(double angle);
-    Matrix getZRotationMatrix(double angle);
-
+    
 public:
     Cube();
     Cube(const Gdiplus::PointF& origin);

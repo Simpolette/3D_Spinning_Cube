@@ -22,6 +22,10 @@ public:
     double& operator [] (int idx);
     Matrix operator * (const Matrix& other);
     Matrix& operator = (const Matrix& other);
+    static Matrix getXRotationMatrix(double angle);
+    static Matrix getYRotationMatrix(double angle);
+    static Matrix getZRotationMatrix(double angle);
+    static double convertDegToRad(double degree);
     Gdiplus::PointF to2D(double focal, Gdiplus::PointF origin);
     void print() const;
 };

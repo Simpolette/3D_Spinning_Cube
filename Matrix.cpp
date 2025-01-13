@@ -64,11 +64,68 @@ Matrix& Matrix::operator = (const Matrix& other){
     return *this;
 }
 
+double Matrix::convertDegToRad(double degree){
+    return degree * M_PI / 180;
+}
+
+Matrix Matrix::getXRotationMatrix(double angle){
+    Matrix matrix(3, 3);
+    angle = convertDegToRad(angle);
+
+    // [0][0]
+    matrix[3 * 0 + 0] = 1;
+    // [1][1]
+    matrix[3 * 1 + 1] = cos(angle);
+    // [2][2]
+    matrix[3 * 2 + 2] = cos(angle);
+    // [1][2]
+    matrix[3 * 1 + 2] = -sin(angle);
+    // [2][1]
+    matrix[3 * 2 + 1] = sin(angle);
+    
+    return matrix;
+}
+
+Matrix Matrix::getYRotationMatrix(double angle){
+    Matrix matrix(3, 3);
+    angle = convertDegToRad(angle);
+
+    // [0][0]
+    matrix[3 * 0 + 0] = cos(angle);
+    // [1][1]
+    matrix[3 * 1 + 1] = 1;
+    // [2][2]
+    matrix[3 * 2 + 2] = cos(angle);
+    // [0][2]
+    matrix[3 * 0 + 2] = sin(angle);
+    // [2][0]
+    matrix[3 * 2 + 0] = -sin(angle);
+
+    return matrix;
+}
+
+Matrix Matrix::getZRotationMatrix(double angle){
+    Matrix matrix(3, 3);
+    angle = convertDegToRad(angle);
+
+    // [0][0]
+    matrix[3 * 0 + 0] = cos(angle);
+    // [1][1]
+    matrix[3 * 1 + 1] = cos(angle);
+    // [2][2]
+    matrix[3 * 2 + 2] = 1;
+    // [0][1]
+    matrix[3 * 0 + 1] = -sin(angle);
+    // [1][0]
+    matrix[3 * 1 + 0] = sin(angle);
+
+    return matrix;
+}
+
 Gdiplus::PointF Matrix::to2D(double focal, Gdiplus::PointF origin){
-    double x = sqrt(2) / 2 * (this->matrix[0] + this->matrix[2]) + origin.X;
-    double y = 1 / sqrt(6) * this->matrix[0] +
-            sqrt(0.5) * this->matrix[1] - 1 / sqrt(6) * this->matrix[2] + origin.Y;
-    return Gdiplus::PointF(x, y);
+    Matrix point2D(*this);
+    point2D = getXRotationMatrix(35.264) * getYRotationMatrix(45) * point2D;
+    return Gdiplus::PointF(point2D[0] + origin.X, point2D[1] + origin.Y);
 }
 
 void Matrix::print() const {

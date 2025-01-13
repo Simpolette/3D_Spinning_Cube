@@ -1,12 +1,14 @@
 #include "Cube.h"
 
 Cube::Cube(){
+    pen = new Gdiplus::Pen((Gdiplus::Color(0, 0, 0)));
     points = NULL;
     origin = Gdiplus::PointF(0, 0);
     focal = 500;
 }
 
 Cube::Cube(const Gdiplus::PointF& origin){
+    pen = new Gdiplus::Pen((Gdiplus::Color(0, 0, 0)));
     this->origin = origin;    
     focal = 500;
     points = new Matrix[SQUARE_SIDES];
@@ -20,6 +22,7 @@ Cube::Cube(const Gdiplus::PointF& origin){
 
 Cube::~Cube(){
     delete[] points;
+    delete pen;
 }
 
 std::vector <Gdiplus::PointF*> Cube::calFaces(){
@@ -66,80 +69,22 @@ std::vector <Gdiplus::PointF*> Cube::calFaces(){
 
 // }
 
-double Cube::convertDegToRad(double degree){
-    return degree * M_PI / 180;
-}
-
-Matrix Cube::getXRotationMatrix(double angle){
-    Matrix matrix(3, 3);
-    // [0][0]
-    matrix[3 * 0 + 0] = 1;
-    // [1][1]
-    matrix[3 * 1 + 1] = cos(angle);
-    // [2][2]
-    matrix[3 * 2 + 2] = cos(angle);
-    // [1][2]
-    matrix[3 * 1 + 2] = -sin(angle);
-    // [2][1]
-    matrix[3 * 2 + 1] = sin(angle);
-    
-    return matrix;
-}
-
-Matrix Cube::getYRotationMatrix(double angle){
-    Matrix matrix(3, 3);
-
-    // [0][0]
-    matrix[3 * 0 + 0] = cos(angle);
-    // [1][1]
-    matrix[3 * 1 + 1] = 1;
-    // [2][2]
-    matrix[3 * 2 + 2] = cos(angle);
-    // [0][2]
-    matrix[3 * 0 + 2] = sin(angle);
-    // [2][0]
-    matrix[3 * 2 + 0] = -sin(angle);
-
-    return matrix;
-}
-
-Matrix Cube::getZRotationMatrix(double angle){
-    Matrix matrix(3, 3);
-
-    // [0][0]
-    matrix[3 * 0 + 0] = cos(angle);
-    // [1][1]
-    matrix[3 * 1 + 1] = cos(angle);
-    // [2][2]
-    matrix[3 * 2 + 2] = 1;
-    // [0][1]
-    matrix[3 * 0 + 1] = -sin(angle);
-    // [1][0]
-    matrix[3 * 1 + 0] = sin(angle);
-
-    return matrix;
-}
-
 void Cube::setFOV(double angle){
-    Matrix rotateX = getXRotationMatrix(convertDegToRad(0));
-    Matrix rotateY = getYRotationMatrix(convertDegToRad(0));
-    Matrix rotateZ = getZRotationMatrix(convertDegToRad(30));
+    Matrix rotateX = Matrix::getXRotationMatrix(0);
+    Matrix rotateY = Matrix::getYRotationMatrix(0);
+    Matrix rotateZ = Matrix::getZRotationMatrix(30);
     Matrix rotate = rotateX * rotateY * rotateZ;
 
     for (int i = 0; i < SQUARE_SIDES; i++){        
         points[i] = rotate * points[i];
-        points[i].print();
-        std::cout << "\n";
     }
 }
 
-void Cube::render(Gdiplus::Graphics& graphics){
-    Gdiplus::Pen pen(Gdiplus::Color(255, 0, 0, 0));
-    
+void Cube::render(Gdiplus::Graphics& graphics){    
     std::vector <Gdiplus::PointF*> faces = calFaces();
 
     for (int i = 0; i < faces.size(); i++){
-        graphics.DrawPolygon(&pen, faces[i], SQUARE_SIDES);
+        graphics.DrawPolygon(pen, faces[i], SQUARE_SIDES);
     }
 
     for (int i = 0; i < faces.size(); i++){
@@ -148,7 +93,7 @@ void Cube::render(Gdiplus::Graphics& graphics){
 }
 
 void Cube::spin(double speed){
-    Matrix rotateZ = getZRotationMatrix(convertDegToRad(speed));
+    Matrix rotateZ = Matrix::getZRotationMatrix(speed);
 
     for (int i = 0; i < SQUARE_SIDES; i++){
         points[i] = rotateZ * points[i];

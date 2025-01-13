@@ -3,14 +3,15 @@
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-Cube cube(Gdiplus::PointF(500, 500));
+std::vector <Cube*> cubes;
 
 VOID OnPaint(HDC hdc){
    Gdiplus::Graphics graphics(hdc);
-   graphics.SetSmoothingMode(Gdiplus::SmoothingModeHighQuality);
-   cube.render(graphics);
-   cube.spin(5);
-
+   graphics.SetSmoothingMode(Gdiplus::SmoothingModeNone);
+   for (int i = 0; i < cubes.size(); i++){
+      cubes[i]->render(graphics);
+      cubes[i]->spin(5);
+   }
 }
 
 INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR argument, INT iCmdShow)
@@ -52,7 +53,6 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR argument, INT iCmdShow)
       hInstance,                // program instance handle
       NULL);                    // creation parameters
 
-   cube.setFOV(10);
 
    ShowWindow(hWnd, iCmdShow);
    UpdateWindow(hWnd);
@@ -64,6 +64,9 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, PSTR argument, INT iCmdShow)
    }
    
    FreeConsole();
+   for (int i = 0; i < cubes.size(); i++){
+      delete cubes[i];
+   }
    Gdiplus::GdiplusShutdown(gdiplusToken);
    return msg.wParam;
 }  // WinMain
@@ -84,12 +87,22 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message,
       return 0;
    }
    case WM_CREATE:
-      SetTimer(hWnd, 1, 16, NULL); // Timer with 16 ms interval
+      SetTimer(hWnd, 1, 8, NULL); // Timer with 16 ms interval
       return 0;
 
    // Handle the timer
    case WM_TIMER:
       InvalidateRect(hWnd, NULL, TRUE); // Trigger repaint
+      return 0;
+
+   case WM_LBUTTONDOWN: {
+      // Extract x and y coordinates from lParam
+      int x = LOWORD(lParam);
+      int y = HIWORD(lParam);
+      Cube* cube = new Cube(Gdiplus::PointF(x, y));
+      cubes.push_back(cube);
+   }
+
       return 0;
 
    case WM_DESTROY:
